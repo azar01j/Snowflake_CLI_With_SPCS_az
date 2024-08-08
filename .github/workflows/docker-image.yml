@@ -1,0 +1,31 @@
+name: Continuous Deployment Of Docker Image to Snowpark Container Services
+
+on: [push] 
+
+# Set Environmental Variables
+env:
+  SNOWFLAKE_CONNECTIONS_DUMMY_ACCOUNT: ${{secrets.TGT_ACCOUNT}}
+  SNOWFLAKE_CONNECTIONS_DUMMY_USER: ${{secrets.TGT_USER}}
+  SNOWFLAKE_CONNECTIONS_DUMMY_PASSWORD: ${{secrets.TGT_PASSWORD}}
+   
+    
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    # Snowflake CLI installation
+    - uses: Snowflake-Labs/snowflake-cli-action@v1
+      with:
+        cli-version: "latest"
+        default-config-file-path: "config.toml"
+    
+    # Use the CLI
+    - name: Test version
+      run: snow --version
+    - name: Test Connection
+      env:
+        SNOWFLAKE_CONNECTIONS_DUMMY_ROLE: Accountadmin
+        SNOWFLAKE_CONNECTIONS_DUMMY_WAREHOUSE: Research
+      run : snow connection test --connection Dummy
+    
